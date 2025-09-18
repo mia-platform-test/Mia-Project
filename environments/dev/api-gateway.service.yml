@@ -11,7 +11,7 @@ metadata:
     app.kubernetes.io/component: custom
     app.kubernetes.io/part-of: mia-project
     app.kubernetes.io/managed-by: mia-platform
-    mia-platform.eu/stage: dev
+    mia-platform.eu/stage: 'dev'
     mia-platform.eu/tenant: c1d106ff-4716-49a1-88e2-940b21705986
 spec:
   type: ClusterIP
