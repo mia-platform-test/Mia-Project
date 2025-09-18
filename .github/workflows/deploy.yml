@@ -5,9 +5,9 @@ on:
 
 jobs:
   deploy-dev:
-    name: Deploy to ENVIRONMENT_NAME environment
+    name: Deploy to dev environment
     if: ${{ github.event.deployment.environment == 'dev' }}
-    concurrency: ENVIRONMENT_NAME
+    concurrency: ${{ github.event.deployment.environment }}
     permissions:
       deployments: write
     runs-on: ubuntu-latest
@@ -19,13 +19,12 @@ jobs:
         if: success()
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
+          token: ${{ github.token }}
           state: 'pending'
           deployment-id: ${{ github.event.deployment.id }}
 
       - name: Deploy my app
         run: |
-          # add your deployment code here
           echo Deploying...
           sleep 10s
           echo Done!
@@ -34,7 +33,7 @@ jobs:
         if: success()
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
+          token: ${{ github.token }}
           state: 'success'
           deployment-id: ${{ github.event.deployment.id }}
 
@@ -42,6 +41,6 @@ jobs:
         if: failure()
         uses: chrnorm/deployment-status@v2
         with:
-          token: '${{ github.token }}'
+          token: ${{ github.token }}
           state: 'failure'
           deployment-id: ${{ github.event.deployment.id }}
