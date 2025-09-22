@@ -1,0 +1,43 @@
+apiVersion: v1
+data:
+  saga.json: |
+    {
+      "persistencyManagement": {
+        "type": "crud",
+        "configurations": {
+          "protocol": "http",
+          "host": "crud-service",
+          "port": 80,
+          "collectionName": "change-with-your-collection"
+        }
+      },
+      "communicationProtocols": [],
+      "machineDefinition": {
+        "businessStates": [
+          {
+            "id": 0,
+            "description": "Default business state"
+          }
+        ],
+        "initialState": "State 1",
+        "creationEvent": "creation-event",
+        "states": [
+          {
+            "id": "State 1",
+            "businessStateId": 0,
+            "isFinal": true
+          }
+        ]
+      }
+    }
+kind: ConfigMap
+metadata:
+  name: flow-configuration
+  annotations:
+    mia-platform.eu/creation-user: api-console
+    mia-platform.eu/version: 14.1.0-alpha.0
+  labels:
+    app.kubernetes.io/part-of: mia-project
+    app.kubernetes.io/managed-by: mia-platform
+    mia-platform.eu/stage: 'dev'
+    mia-platform.eu/tenant: c1d106ff-4716-49a1-88e2-940b21705986
