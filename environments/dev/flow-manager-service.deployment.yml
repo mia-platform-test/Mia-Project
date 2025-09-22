@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flow-manager-service
+  annotations:
+    mia-platform.eu/version: 14.1.0-alpha.0
+    apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+    apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+    fluentbit.io/parser: pino
+  labels:
+    app: flow-manager-service
+    app.kubernetes.io/name: flow-manager-service
+    app.kubernetes.io/version: 2.7.0
+    app.kubernetes.io/component: custom
+    app.kubernetes.io/part-of: mia-project
+    app.kubernetes.io/managed-by: mia-platform
+    mia-platform.eu/stage: 'dev'
+    mia-platform.eu/tenant: c1d106ff-4716-49a1-88e2-940b21705986
+    mia-platform.eu/log-type: mia-json
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flow-manager-service
+  strategy:
+    type: RollingUpdate
+  revisionHistoryLimit: 1
+  template:
+    metadata:
+      annotations:
+        mia-platform.eu/version: 14.1.0-alpha.0
+        apparmor.security.beta.kubernetes.io/allowedProfileNames: runtime/default
+        apparmor.security.beta.kubernetes.io/defaultProfileName: runtime/default
+        fluentbit.io/parser: pino
+      labels:
+        app: flow-manager-service
+        app.kubernetes.io/name: flow-manager-service
+        app.kubernetes.io/version: 2.7.0
+        app.kubernetes.io/component: custom
+        app.kubernetes.io/part-of: mia-project
+        app.kubernetes.io/managed-by: mia-platform
+        mia-platform.eu/stage: 'dev'
+        mia-platform.eu/tenant: c1d106ff-4716-49a1-88e2-940b21705986
+        mia-platform.eu/log-type: mia-json
+    spec:
+      imagePullSecrets:
+        - name: nexus-gcloud
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: flow-manager-service
+      containers:
+        - name: flow-manager-service
+          image: nexus.mia-platform.eu/core/flow-manager:2.7.0
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 150Mi
+              cpu: 100m
+            requests:
+              memory: 150Mi
+              cpu: 100m
+          volumeMounts:
+            - name: flow-configuration
+              mountPath: /configuration
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          args: []
+          env:
+            - name: LOG_LEVEL
+              value: '{{LOG_LEVEL}}'
+            - name: HTTP_PORT
+              value: '3000'
+            - name: USERID_HEADER_KEY
+              value: miauserid
+            - name: GROUPS_HEADER_KEY
+              value: miausergroups
+            - name: CLIENTTYPE_HEADER_KEY
+              value: miaclienttype
+            - name: BACKOFFICE_HEADER_KEY
+              value: isbackoffice
+            - name: USER_PROPERTIES_HEADER_KEY
+              value: miauserproperties
+            - name: MICROSERVICE_GATEWAY_SERVICE_NAME
+              value: microservice-gateway
+            - name: CONFIGURATIONS_FILE_PATH
+              value: /configuration/saga.json
+            - name: SAGA_ID_PREFIX
+              value: CHANGE_WITH_YOUR_SAGA_ID_PREFIX
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              port: http
+              path: /-/ready
+          livenessProbe:
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 1
+            failureThreshold: 3
+            httpGet:
+              port: http
+              path: /-/healthz
+          securityContext:
+            allowPrivilegeEscalation: false
+            privileged: false
+      volumes:
+        - name: flow-configuration
+          configMap:
+            name: flow-configuration
+      hostIPC: false
+      hostNetwork: false
+      hostPID: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
